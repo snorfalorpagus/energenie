@@ -2,15 +2,5 @@
 
 from energenie import *
 
-@click.command()
-@click.option("--socket", type=click.Choice(["1", "2", "3", "4", "ALL"]), required=True)
-@click.option("--command", type=click.Choice(["on", "off"]), required=True)
-def send(socket, command):
-    send_command(socket, command)
+main()
 
-if __name__ == "__main__":
-    try:
-        init()
-        send()
-    finally:
-        GPIO.cleanup()

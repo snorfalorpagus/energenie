@@ -11,6 +11,7 @@ Based on documentation: https://energenie4u.co.uk/res/pdfs/ENER314%20UM.pdf
 import RPi.GPIO as GPIO
 import time
 import click
+import atexit
 
 # encoder pins
 K0 = 11
@@ -46,12 +47,16 @@ def init():
     GPIO.setup(18, GPIO.OUT)
     GPIO.output(18, False)
 
+def cleanup():
+    GPIO.cleanup()
+atexit.register(cleanup)
+
 def send_command(socket, command):
     if socket == "ALL":
         print("Turning ALL sockets {}".format(command.upper()))
     else:
         print("Turning socket #{} {}".format(socket, command.upper()))
-    D2, D1, D0 = SOCKET[socket]
+    D2, D1, D0 = SOCKET[str(socket)]
     D3 = COMMAND[command.upper()]
     _send(D0, D1, D2, D3)
 
@@ -69,15 +74,26 @@ def _send(D0, D1, D2, D3):
     # disable the modulator
     GPIO.output(22, False)
 
+def easy_send(socket, command, retry, wait):
+    for n in range(0, retry):
+        send_command(socket, command)
+        if wait:
+            time.sleep(wait)
+
 @click.command()
 @click.option("--socket", type=click.Choice(["1", "2", "3", "4", "ALL"]))
 @click.option("--command", type=click.Choice(["on", "off"]))
-def send(socket, command):
-    send_command(socket, command)
+@click.option("--retry", type=int, default=1, help="number of attempts")
+@click.option("--wait", type=int, default=0, help="seconds to wait between retries")
+def send(*args, **kwargs):
+    easy_send(*args, **kwargs)
 
-if __name__ == "__main__":
+def main():
     try:
         init()
         send()
     finally:
         GPIO.cleanup()
+
+if __name__ == "__main__":
+    main()
