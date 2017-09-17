@@ -34,7 +34,9 @@ COMMAND = {
     "OFF": 0,
 }
 
+INIT_DONE = False
 def init():
+    INIT_DONE = True
     GPIO.setmode(GPIO.BOARD)
     # select the GPIO pins used for the encoder K0-K3 data inputs
     # and initialise to 0000
@@ -48,7 +50,8 @@ def init():
     GPIO.output(18, False)
 
 def cleanup():
-    GPIO.cleanup()
+    if INIT_DONE:
+        GPIO.cleanup()
 atexit.register(cleanup)
 
 def send_command(socket, command):
