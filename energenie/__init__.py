@@ -77,15 +77,15 @@ def _send(D0, D1, D2, D3):
     # disable the modulator
     GPIO.output(22, False)
 
-def easy_send(socket, command, retry, wait):
+def easy_send(socket, command, retry=1, wait=0):
     for n in range(0, retry):
         send_command(socket, command)
         if wait:
             time.sleep(wait)
 
 @click.command()
-@click.option("--socket", type=click.Choice(["1", "2", "3", "4", "ALL"]))
-@click.option("--command", type=click.Choice(["on", "off"]))
+@click.option("--socket", type=click.Choice(["1", "2", "3", "4", "ALL"]), required=True)
+@click.option("--command", type=click.Choice(["on", "off"]), required=True)
 @click.option("--retry", type=int, default=1, help="number of attempts")
 @click.option("--wait", type=int, default=0, help="seconds to wait between retries")
 def send(*args, **kwargs):
